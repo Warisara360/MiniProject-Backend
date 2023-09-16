@@ -61,12 +61,19 @@ public class Menu {
 	@ManyToOne
 	@JoinColumn(name = "menuType_id")
 	private MenuType menuType;
-
+	
 	public MenuType getMenuType() {
 	return menuType;
 	}
-    
 	public void setMenuType(MenuType menuType) {
 	this.menuType = menuType;
+	}
+	
+	@ManyToOne
+    @JoinColumn(name = "member_id")
+	private Member member;
+	
+	public void setMember(Member member) {
+		this.member = member;
 	}
 }

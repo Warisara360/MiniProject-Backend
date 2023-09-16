@@ -16,8 +16,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Member;
+import com.example.demo.model.Menu;
 import com.example.demo.model.Typemem;
 import com.example.demo.repository.MemberRepository;
+import com.example.demo.repository.MenuRepository;
 import com.example.demo.repository.TypememRepository;
 
 @RestController
@@ -28,6 +30,9 @@ public class MemberController {
 		
 		@Autowired
 		TypememRepository typememRepository;
+		
+		@Autowired
+		MenuRepository menuRepository;
 		
 		
 		
@@ -49,11 +54,19 @@ public class MemberController {
 			
 			try {
 			
-				Optional<Typemem> typemem= typememRepository.findById(3);
+				Optional<Typemem> typemem= typememRepository.findById(2);
 				
 				body.setTypmmem(typemem.get());
 				
 				Member member = memberRepository.save(body);
+				
+				
+				for(Menu menu: body.getMenus()) {
+		            menu.setMember(member);
+		            	
+		            menuRepository.save(menu);
+		            }
+				
 				
 				
 				return new ResponseEntity<>(member, HttpStatus.CREATED);	
@@ -64,7 +77,7 @@ public class MemberController {
 		}
 			
 		
-			@GetMapping("/member{memberId}")
+			@GetMapping("/member/{memberId}")
 			public ResponseEntity<Object> getMemberDetail(@PathVariable Integer memberId) {
 				
 			 try {
@@ -72,7 +85,7 @@ public class MemberController {
 				 if(member.isPresent()) {
 					 return new ResponseEntity<>(member, HttpStatus.OK);
 			 }else {
-				 return new ResponseEntity<> ("Employee not found", HttpStatus.BAD_REQUEST);
+				 return new ResponseEntity<> ("Member not found", HttpStatus.BAD_REQUEST);
 				 }
 			 }catch (Exception e){
 					return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -85,13 +98,14 @@ public class MemberController {
 				
 				try {
 					Optional<Member> member = memberRepository.findById(memberId);
+					
 					if (member.isPresent()) {
 						Member memberEdit= member.get();
 						memberEdit.setFristName(body.getFristName());
 						memberEdit.setLastName(body.getLastName());
 						memberEdit.setEmail(body.getEmail());
-						memberEdit.setId(body.getId());
-						
+						memberEdit.setMemberId(body.getMemberId());
+												
 						memberRepository.save(member.get());
 						
 						return new ResponseEntity<>(memberEdit , HttpStatus.OK);
