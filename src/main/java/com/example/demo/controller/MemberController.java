@@ -2,11 +2,12 @@ package com.example.demo.controller;
 
 import java.util.ArrayList;
 import java.util.List;
-
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,153 +17,111 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.model.Member;
-import com.example.demo.model.Menu;
-import com.example.demo.model.Typemem;
 import com.example.demo.repository.MemberRepository;
 import com.example.demo.repository.MenuRepository;
-import com.example.demo.repository.TypememRepository;
 
+
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class MemberController {
+
+    @Autowired
+    MemberRepository memberRepository;
+
+
+	@Autowired
+	MenuRepository menuRepository;
 	
-		@Autowired
-		MemberRepository memberRepository;
-		
-		@Autowired
-		TypememRepository typememRepository;
-		
-		@Autowired
-		MenuRepository menuRepository;
-		
-		
-		
-		private List<Member> data = new ArrayList<Member>();	
-		
-		@GetMapping("/member")
-		public ResponseEntity<Object> getMember(){
-			try {
-				List<Member> members = memberRepository.findAll();
-						return new ResponseEntity<> (members,HttpStatus.OK);
-			} catch (Exception e) {
-				return new ResponseEntity<> ("Internal sever error",HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-			
-		}
-		
-		@PostMapping("/member")
-		public ResponseEntity<Object> addMember(@RequestBody Member body) {
-			
-			try {
-			
-				Optional<Typemem> typemem= typememRepository.findById(2);
-				
-				body.setTypmmem(typemem.get());
-				
-				Member member = memberRepository.save(body);
-				
-				
-				for(Menu menu: body.getMenus()) {
-		            menu.setMember(member);
-		            	
-		            menuRepository.save(menu);
-		            }
-				
-				
-				
-				return new ResponseEntity<>(member, HttpStatus.CREATED);	
-			}catch (Exception e){
-				e.printStackTrace();
-				return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
-			
-		
-			@GetMapping("/member/{memberId}")
-			public ResponseEntity<Object> getMemberDetail(@PathVariable Integer memberId) {
-				
-			 try {
-				 Optional<Member> member = memberRepository.findById(memberId);
-				 if(member.isPresent()) {
-					 return new ResponseEntity<>(member, HttpStatus.OK);
-			 }else {
-				 return new ResponseEntity<> ("Member not found", HttpStatus.BAD_REQUEST);
-				 }
-			 }catch (Exception e){
-					return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-			}
-		
-			
-			@PutMapping("/member/{memberId}")
-				public ResponseEntity<Object> updateMember(@PathVariable Integer memberId,@RequestBody Member body) {
-				
-				try {
-					Optional<Member> member = memberRepository.findById(memberId);
-					
-					if (member.isPresent()) {
-						Member memberEdit= member.get();
-						memberEdit.setFristName(body.getFristName());
-						memberEdit.setLastName(body.getLastName());
-						memberEdit.setEmail(body.getEmail());
-						memberEdit.setMemberId(body.getMemberId());
-												
-						memberRepository.save(member.get());
-						
-						return new ResponseEntity<>(memberEdit , HttpStatus.OK);
-					}else {
-						return new ResponseEntity<>("Member not found", HttpStatus.BAD_REQUEST);
-					}
-				}catch (Exception e) {
-					return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-			}
-			
-			
-			
-			@DeleteMapping("/member/{memberId}")
-			public ResponseEntity<Object> deleteMember(@PathVariable Integer memberId) {
-			
-				try {
-					Optional<Member> member = memberRepository.findById(memberId);
-					
-				if (member.isPresent()) {
-					memberRepository.delete(member.get());
-					return new ResponseEntity<>("DELETE SUCSESS", HttpStatus.OK);
-				}
-				else {
-					return new ResponseEntity<>("Member not fond",HttpStatus.BAD_REQUEST);
-				}
-				}catch (Exception e) {
-				return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
-				
-			}
 
-			}
-			
 
-			public MemberRepository getMemberRepository() {
-				return memberRepository;
-			}
+    private List<Member> data = new ArrayList<Member>();
 
-			public void setMemberRepository( MemberRepository memberRepository) {
-				this.memberRepository = memberRepository;
-			}
+    @PostMapping("/loginMember")
+    public ResponseEntity<Object> loginMember(@RequestBody Member loginRequest) {
+        try {
+            Optional<Member> memberFound = memberRepository.findByEmail(loginRequest.getEmail());
+            if (memberFound.isPresent() && memberFound.get().getPassword().equals(loginRequest.getPassword())) {
+                memberFound.get().setPassword(null);
+                return new ResponseEntity<>(memberFound, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Invalid credentials.", HttpStatus.UNAUTHORIZED);
+            }
+        } catch (Exception e) {
+            System.out.println(e.getMessage());
+            return new ResponseEntity<>("Internal server error.", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-			public TypememRepository getTypememRepository() {
-				return typememRepository;
-			}
+    @GetMapping("/member")
+    public ResponseEntity<Object> getMember() {
+        try {
+            List<Member> members = memberRepository.findAll();
+            return new ResponseEntity<>(members, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal server error", HttpStatus.OK);
+        }
+    }
 
-			public void setTypememRepository(TypememRepository typememRepository) {
-				this.typememRepository = typememRepository;
-			}
+    @PostMapping("/member")
+    public ResponseEntity<Object> addMember(@RequestBody Member body) {
+        try {
+            Member member = memberRepository.save(body);
+            return new ResponseEntity<>(member, HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-	
-		
-			public List<Member> getData() {
-				return data;
-			}
+    @GetMapping("/member/{user_id}")
+    public ResponseEntity<Object> memberDetail(@PathVariable Integer user_id) {
+        try {
+            Optional<Member> member = memberRepository.findById(user_id);
+            if (member.isPresent()) {
+                return new ResponseEntity<>(member, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Member not found", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
-			public void setData(List<Member> data) {
-				this.data = data;
-			}
-			}
+    @PutMapping("/member/{user_id}")
+    public ResponseEntity<Object> updateMember(@PathVariable Integer user_id, @RequestBody Member body) {
+        try {
+            Optional<Member> member = memberRepository.findById(user_id);
+
+            if (member.isPresent()) {
+                Member memberEdit = member.get();
+                memberEdit.setFristName(body.getFristName());
+                memberEdit.setLastName(body.getLastName());
+                memberEdit.setEmail(body.getEmail());
+                memberEdit.setPassword(body.getPassword());
+
+                memberRepository.save(member.get());
+                return new ResponseEntity<>(member, HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Member not found", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @DeleteMapping("/member/{user_id}")
+    public ResponseEntity<Object> deleteMember(@PathVariable Integer user_id) {
+        try {
+            Optional<Member> member = memberRepository.findById(user_id);
+
+            if (member.isPresent()) {
+                memberRepository.delete(member.get());
+                return new ResponseEntity<>("Delete SUCCESS", HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>("Member not found", HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>("Internal server error", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+}

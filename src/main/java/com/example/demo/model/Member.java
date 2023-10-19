@@ -17,92 +17,55 @@ public class Member {
 	
 	    @Id
 		@GeneratedValue(strategy = GenerationType.AUTO)
-		private Integer id;
 	    private Integer memberId;
+	    
 		private String fristName;
 		private String lastName;
 		private String email;
+		private String password;
 		
+		public Member() {
+	    }
 		
-		public Member(Integer memberId, String fristName, String lastName, String email) {
+		public Member(Integer memberId, String fristName, String lastName, String email, String password) {
 			super();
 			this.memberId = memberId;
 			this.fristName = fristName;
 			this.lastName = lastName;
 			this.email = email;
-			
+			this.password = password;
 		}
-
-		public Member() {
-			super();
-		}		
-
-		
-		public Integer getId() {
-			return id;
-		}
-
-		public void setId(Integer id) {
-			this.id = id;
-		}
-
 		public Integer getMemberId() {
 			return memberId;
 		}
-
 		public void setMemberId(Integer memberId) {
 			this.memberId = memberId;
 		}
-
 		public String getFristName() {
 			return fristName;
 		}
-
 		public void setFristName(String fristName) {
 			this.fristName = fristName;
 		}
-
 		public String getLastName() {
 			return lastName;
 		}
-
 		public void setLastName(String lastName) {
 			this.lastName = lastName;
 		}
-
 		public String getEmail() {
 			return email;
 		}
-
 		public void setEmail(String email) {
 			this.email = email;
 		}
+		public String getPassword() {
+			return password;
+		}
+		public void setPassword(String password) {
+			this.password = password;
+		}
+		
+	
 
-		
-		@ManyToOne
-		@JoinColumn(name = "typemem_id")
-		private Typemem typemem;
-        
-		
-		@OneToMany
-		@JoinColumn(name = "member_id")
-		private List<Menu> menus;
-		
-		
-		public Typemem getTypemem() {
-		return typemem;
-		}
-		public void setTypmmem(Typemem typemem) {
-			this.typemem = typemem;
-		}
-
-		
-		public List<Menu> getMenus() {
-			return menus;
-		}
-
-		public void setMenus(List<Menu> menus) {
-			this.menus = menus;
-		}
-		
 }

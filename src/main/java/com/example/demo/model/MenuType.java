@@ -12,22 +12,34 @@ public class MenuType {
 	 @Id
 	 @GeneratedValue(strategy = GenerationType.AUTO)
 	
-	private Integer id;
-	private String name;
+	private Integer menuTypeId;
+	private String menuType_name;
 	
 	
-	public Integer getId() {
-		return id;
+	public MenuType() {
+		super();
 	}
-	public void setId(Integer id) {
-		this.id = id;
+	
+	public MenuType(Integer menuTypeId, String menuType_name) {
+		super();
+		this.menuTypeId = menuTypeId;
+		this.menuType_name = menuType_name;
 	}
-	public String getName() {
-		return name;
+	
+	public Integer getMenuTypeId() {
+		return menuTypeId;
 	}
-	public void setName(String name) {
-		this.name = name;
+	public void setMenuTypeId(Integer menuTypeId) {
+		this.menuTypeId = menuTypeId;
 	}
+	public String getMenuType_name() {
+		return menuType_name;
+	}
+	public void setMenuType_name(String menuType_name) {
+		this.menuType_name = menuType_name;
+	}
+	
+	
 	
 	
 
